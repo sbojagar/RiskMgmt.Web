@@ -38,7 +38,7 @@ public class CryptoController : ControllerBase
     }
 
     [HttpPost("calculate-risk")]
-    public ActionResult<RiskCalculationModel> CalculateRisk([FromBody] RiskCalculationModel request)
+    public ActionResult<RiskCalculationModel> CalculateRisk([FromBody] RiskCalculationRequest request)
     {
         try
         {
@@ -46,7 +46,9 @@ public class CryptoController : ControllerBase
                 request.AccountBalance,
                 request.RiskPercentage,
                 request.EntryPrice,
-                request.StopLossPrice
+                request.StopLossPrice,
+                request.Leverage,
+                request.IsShort
             );
             return Ok(result);
         }
@@ -55,4 +57,15 @@ public class CryptoController : ControllerBase
             return BadRequest($"Error calculating risk: {ex.Message}");
         }
     }
+
+    public class RiskCalculationRequest
+    {
+        public decimal AccountBalance { get; set; }
+        public decimal RiskPercentage { get; set; }
+        public decimal EntryPrice { get; set; }
+        public decimal StopLossPrice { get; set; }
+        public decimal Leverage { get; set; } = 1;
+        public bool IsShort { get; set; }
+    }
+
 }

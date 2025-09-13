@@ -1,33 +1,364 @@
-﻿@* @{
-    ViewData["Title"] = "Home Page";
-}
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div> *@
-
-<!-- Views/Home/Index.cshtml -->
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>Crypto Risk Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Crypto Trading Risk Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        .price-card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .price-up { color: #28a745; }
-        .price-down { color: #dc3545; }
-        .risk-calculator { background: #f8f9fa; padding: 20px; border-radius: 10px; }
+        :root {
+            --primary-color: #f7931e;
+            --success-color: #16c784;
+            --danger-color: #ea3943;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-light: #ffffff;
+            --text-muted: #8d8d8d;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .price-card {
+            background: var(--card-bg);
+            border: 1px solid #404040;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .price-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            }
+
+            .price-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 35px rgba(247, 147, 30, 0.2);
+            }
+
+        .price-up {
+            color: var(--success-color);
+            animation: pulse-green 1s ease-in-out;
+        }
+
+        .price-down {
+            color: var(--danger-color);
+            animation: pulse-red 1s ease-in-out;
+        }
+
+        .price-neutral {
+            color: var(--text-muted);
+        }
+
+        @@keyframes pulse-green {
+            0%, 100%
+
+        {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        }
+
+        @@keyframes pulse-red {
+            0%, 100%
+
+        {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        }
+
+        .price-update-flash {
+            background: var(--primary-color);
+            transition: background-color 0.5s ease;
+        }
+
+        .risk-calculator {
+            background: var(--card-bg);
+            border: 1px solid #404040;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+            .risk-calculator::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, var(--primary-color), var(--success-color), var(--danger-color));
+            }
+
+        .form-control, .form-select {
+            background: #404040;
+            border: 1px solid #555;
+            color: var(--text-light);
+            border-radius: 10px;
+            padding: 12px 15px;
+        }
+
+            .form-control:focus, .form-select:focus {
+                background: #404040;
+                border-color: var(--primary-color);
+                color: var(--text-light);
+                box-shadow: 0 0 0 0.2rem rgba(247, 147, 30, 0.25);
+            }
+
+            .form-control::placeholder {
+                color: var(--text-muted);
+            }
+
+        .form-label {
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #e8841c);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #e8841c, var(--primary-color));
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(247, 147, 30, 0.4);
+            }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+        }
+
+            .btn-outline-primary:hover {
+                background: var(--primary-color);
+                color: white;
+            }
+
+        .position-type-selector {
+            background: #333;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .form-check-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .form-check-input:checked + .form-check-label {
+            background: rgba(247, 147, 30, 0.2);
+            color: var(--primary-color);
+        }
+
+        .results-container {
+            background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .result-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .crypto-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            z-index: 1000;
+        }
+
+        .connected {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .disconnected {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @@keyframes spin {
+            to
+
+        {
+            transform: rotate(360deg);
+        }
+
+        }
+
+        .leverage-warning {
+            background: rgba(234, 57, 67, 0.1);
+            border: 1px solid var(--danger-color);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        .risk-gauge {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .risk-level {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .risk-low {
+            background: var(--success-color);
+        }
+
+        .risk-medium {
+            background: var(--primary-color);
+        }
+
+        .risk-high {
+            background: var(--danger-color);
+        }
+
+        @@media (max-width: 768px) {
+            .container-fluid
+
+        {
+            padding: 15px;
+        }
+
+        .risk-calculator {
+            padding: 20px;
+        }
+
+        .price-card {
+            margin-bottom: 15px;
+        }
+
+        }
     </style>
 </head>
 <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-bitcoin"></i> CryptoRisk Manager
+            </a>
+            <div class="ms-auto">
+                <span class="navbar-text">
+                    <i class="fas fa-shield-alt"></i> Professional Trading Tools
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Connection Status -->
+    <div id="connectionStatus" class="connection-status disconnected">
+        <i class="fas fa-wifi"></i> Connecting...
+    </div>
+
     <div class="container-fluid py-4">
-        <h1 class="text-center mb-4">Crypto Trading Risk Management</h1>
+        <!-- Header Section -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="fas fa-chart-line text-warning"></i>
+                Crypto Trading Risk Management
+            </h1>
+            <p class="lead text-muted">Professional position sizing and risk calculation for cryptocurrency futures trading</p>
+        </div>
 
         <!-- Live Prices Section -->
-        <div class="row mb-4">
+        <div class="row mb-5">
             <div class="col-12">
-                <h3>Live Crypto Prices</h3>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-broadcast-tower text-warning"></i> Live Crypto Prices</h3>
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshPrices()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
                 <div class="row" id="priceContainer">
                     <!-- Price cards will be populated here -->
                 </div>
@@ -35,46 +366,177 @@
         </div>
 
         <!-- Risk Calculator Section -->
-        <div class="row">
-            <div class="col-md-8 mx-auto">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
                 <div class="risk-calculator">
-                    <h3 class="text-center mb-4">Position Size Calculator</h3>
+                    <div class="text-center mb-4">
+                        <h3><i class="fas fa-calculator text-warning"></i> Futures Position Size Calculator</h3>
+                        <p class="text-muted">Calculate optimal position sizes for leveraged crypto trading with proper risk management</p>
+                    </div>
 
                     <form id="riskForm">
-                        <div class="row mb-3">
+                        <!-- Account & Risk Settings -->
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <label for="accountBalance" class="form-label">Account Balance (USDT)</label>
-                                <input type="number" class="form-control" id="accountBalance" step="0.01" required>
+                                <label for="accountBalance" class="form-label">
+                                    <i class="fas fa-wallet"></i> Account Balance (USDT)
+                                </label>
+                                <input type="number" class="form-control" id="accountBalance" step="0.01" required placeholder="Enter your account balance">
+                                <div class="form-text text-muted">Total USDT available in your futures account</div>
                             </div>
                             <div class="col-md-6">
-                                <label for="riskPercentage" class="form-label">Risk Percentage (%)</label>
-                                <input type="number" class="form-control" id="riskPercentage" step="0.1" max="10" required>
+                                <label for="riskPercentage" class="form-label">
+                                    <i class="fas fa-percentage"></i> Risk Percentage (%)
+                                </label>
+                                <input type="number" class="form-control" id="riskPercentage" step="0.1" max="10" min="0.1" required placeholder="1-3% recommended">
+                                <div class="form-text text-muted">Recommended: 1-2% for crypto futures</div>
+                                <div class="risk-gauge">
+                                    <div class="risk-level risk-low" id="riskGauge" style="width: 0%"></div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="entryPrice" class="form-label">Entry Price (USDT)</label>
-                                <input type="number" class="form-control" id="entryPrice" step="0.00001" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="stopLossPrice" class="form-label">Stop Loss Price (USDT)</label>
-                                <input type="number" class="form-control" id="stopLossPrice" step="0.00001" required>
+                        <!-- Position Type Selector -->
+                        <div class="position-type-selector">
+                            <label class="form-label mb-3">
+                                <i class="fas fa-exchange-alt"></i> Position Type
+                            </label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="positionType" id="longPosition" value="false" checked>
+                                        <label class="form-check-label w-100 text-center" for="longPosition">
+                                            <i class="fas fa-arrow-up text-success"></i> Long Position 📈
+                                            <small class="d-block text-muted">Buy low, sell high</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="positionType" id="shortPosition" value="true">
+                                        <label class="form-check-label w-100 text-center" for="shortPosition">
+                                            <i class="fas fa-arrow-down text-danger"></i> Short Position 📉
+                                            <small class="d-block text-muted">Sell high, buy low</small>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="text-center mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">Calculate Position Size</button>
+                        <!-- Price & Leverage Settings -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label for="entryPrice" class="form-label">
+                                    <i class="fas fa-bullseye"></i> Entry Price (USDT)
+                                </label>
+                                <input type="number" class="form-control" id="entryPrice" step="0.01" required placeholder="Target entry price">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="stopLossPrice" class="form-label">
+                                    <i class="fas fa-stop-circle"></i> Stop Loss Price (USDT)
+                                </label>
+                                <input type="number" class="form-control" id="stopLossPrice" step="0.01" required placeholder="Stop loss price">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="leverage" class="form-label">
+                                    <i class="fas fa-lever"></i> Leverage
+                                </label>
+                                <select class="form-select" id="leverage" required>
+                                    <option value="1">1x (Spot Trading)</option>
+                                    <option value="2">2x</option>
+                                    <option value="3">3x</option>
+                                    <option value="5" selected>5x</option>
+                                    <option value="10">10x</option>
+                                    <option value="20">20x (High Risk)</option>
+                                    <option value="50">50x (Very High Risk)</option>
+                                    <option value="100">100x (Extreme Risk)</option>
+                                </select>
+                                <div class="leverage-warning" id="leverageWarning" style="display: none;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>High Risk:</strong> High leverage increases both profit potential and liquidation risk.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculate Button -->
+                        <div class="text-center mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-calculator"></i> Calculate Position Size
+                                <span class="loading-spinner ms-2" id="loadingSpinner" style="display: none;"></span>
+                            </button>
                         </div>
                     </form>
 
-                    <!-- Results -->
-                    <div id="results" class="mt-4" style="display: none;">
-                        <div class="alert alert-info">
-                            <h5>Calculation Results:</h5>
-                            <p><strong>Risk Amount:</strong> $<span id="riskAmount"></span> USDT</p>
-                            <p><strong>Position Size:</strong> <span id="positionSize"></span> coins</p>
-                            <p><strong>USDT Investment:</strong> $<span id="usdtInvestment"></span> USDT</p>
+                    <!-- Results Section -->
+                    <div id="results" class="results-container" style="display: none;">
+                        <div class="text-center mb-4">
+                            <h5><i class="fas fa-chart-pie text-warning"></i> Position Calculation Results</h5>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="result-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-dollar-sign"></i> Risk Amount:</span>
+                                        <span class="result-value">$<span id="riskAmount">0.00</span></span>
+                                    </div>
+                                </div>
+
+                                <div class="result-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><i class="fab fa-bitcoin"></i> Position Size:</span>
+                                        <span class="result-value"><span id="positionSize">0.000000</span> BTC</span>
+                                    </div>
+                                </div>
+
+                                <div class="result-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-credit-card"></i> Margin Required:</span>
+                                        <span class="result-value">$<span id="marginRequired">0.00</span></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="result-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-chart-area"></i> Position Value:</span>
+                                        <span class="result-value">$<span id="totalPositionValue">0.00</span></span>
+                                    </div>
+                                </div>
+
+                                <div class="result-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-tachometer-alt"></i> Leverage Used:</span>
+                                        <span class="result-value"><span id="leverageUsed">1</span>x</span>
+                                    </div>
+                                </div>
+
+                                <div class="result-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-exclamation-triangle text-danger"></i> Liquidation Price:</span>
+                                        <span class="result-value text-danger">$<span id="liquidationPrice">0.00</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Summary -->
+                        <div class="mt-4 p-3 bg-dark rounded">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Free Margin After</small>
+                                    <strong class="text-success">$<span id="freeMargin">0.00</span></strong>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Margin Usage</small>
+                                    <strong id="marginUsage">0%</strong>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Risk Reward</small>
+                                    <strong class="text-warning">1:<span id="riskReward">0</span></strong>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -82,26 +544,60 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script>
+        // Global variables
+        let connection;
+        let currentPrices = {};
+
         // SignalR connection
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/priceHub")
-            .build();
+        function initializeSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/priceHub")
+                .withAutomaticReconnect()
+                .build();
 
-        // Start SignalR connection
-        connection.start().then(function () {
-            console.log("SignalR connected");
-            loadInitialPrices();
-        }).catch(function (err) {
-            console.error(err.toString());
-        });
+            // Connection events
+            connection.start().then(function () {
+                console.log("SignalR connected");
+                updateConnectionStatus(true);
+                loadInitialPrices();
+            }).catch(function (err) {
+                console.error(err.toString());
+                updateConnectionStatus(false);
+            });
 
-        // Receive real-time price updates
-        connection.on("ReceivePriceUpdate", function (priceData) {
-            updatePriceCard(priceData);
-        });
+            // Receive real-time price updates
+            connection.on("ReceivePriceUpdate", function (priceData) {
+                currentPrices[priceData.symbol] = priceData;
+                updatePriceCard(priceData);
+            });
+
+            // Handle reconnection
+            connection.onreconnected(() => {
+                console.log("SignalR reconnected");
+                updateConnectionStatus(true);
+            });
+
+            connection.onclose(() => {
+                console.log("SignalR disconnected");
+                updateConnectionStatus(false);
+            });
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            if (connected) {
+                statusElement.className = 'connection-status connected';
+                statusElement.innerHTML = '<i class="fas fa-wifi"></i> Connected';
+            } else {
+                statusElement.className = 'connection-status disconnected';
+                statusElement.innerHTML = '<i class="fas fa-wifi"></i> Disconnected';
+            }
+        }
 
         // Load initial prices
         async function loadInitialPrices() {
@@ -111,9 +607,11 @@
                 try {
                     const response = await fetch(`/api/crypto/price/${symbol}`);
                     const priceData = await response.json();
+                    currentPrices[symbol] = priceData;
                     createPriceCard(priceData);
                 } catch (error) {
                     console.error(`Error loading ${symbol}:`, error);
+                    createErrorCard(symbol);
                 }
             }
         }
@@ -122,20 +620,47 @@
         function createPriceCard(priceData) {
             const container = document.getElementById('priceContainer');
             const changeClass = priceData.change24h >= 0 ? 'price-up' : 'price-down';
-            const changeIcon = priceData.change24h >= 0 ? '↗' : '↘';
+            const changeIcon = priceData.change24h >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+            const cryptoSymbol = priceData.symbol.replace('USDT', '');
+            const cryptoIcon = getCryptoIcon(cryptoSymbol);
 
             const cardHtml = `
-                <div class="col-md-2 col-sm-4 mb-3">
-                    <div class="card price-card" id="card-${priceData.symbol}">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">${priceData.symbol.replace('USDT', '')}</h6>
-                            <h5 class="card-text" id="price-${priceData.symbol}">$${priceData.price.toFixed(4)}</h5>
-                            <small class="${changeClass}" id="change-${priceData.symbol}">
-                                ${changeIcon} ${priceData.change24h.toFixed(2)}%
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card price-card h-100" id="card-${priceData.symbol}">
+                        <div class="card-body text-center d-flex flex-column">
+                            <div class="crypto-icon mb-2">${cryptoIcon}</div>
+                            <h6 class="card-title fw-bold">${cryptoSymbol}/USDT</h6>
+                            <h5 class="card-text fw-bold mb-2" id="price-${priceData.symbol}">$${formatPrice(priceData.price)}</h5>
+                            <small class="${changeClass} mb-3" id="change-${priceData.symbol}">
+                                <i class="fas ${changeIcon}"></i> ${priceData.change24h.toFixed(2)}%
                             </small>
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-primary" onclick="usePrice('${priceData.symbol}', ${priceData.price})">
-                                    Use Price
+                            <div class="mt-auto">
+                                <button class="btn btn-outline-primary btn-sm w-100" onclick="usePrice('${priceData.symbol}', ${priceData.price})">
+                                    <i class="fas fa-mouse-pointer"></i> Use Price
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += cardHtml;
+        }
+
+        // Create error card for failed price loads
+        function createErrorCard(symbol) {
+            const container = document.getElementById('priceContainer');
+            const cryptoSymbol = symbol.replace('USDT', '');
+
+            const cardHtml = `
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card price-card h-100 border-danger">
+                        <div class="card-body text-center d-flex flex-column">
+                            <div class="crypto-icon mb-2">❌</div>
+                            <h6 class="card-title fw-bold">${cryptoSymbol}/USDT</h6>
+                            <p class="text-danger small">Failed to load</p>
+                            <div class="mt-auto">
+                                <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                    <i class="fas fa-exclamation-triangle"></i> Error
                                 </button>
                             </div>
                         </div>
@@ -150,35 +675,132 @@
             const priceElement = document.getElementById(`price-${priceData.symbol}`);
             const changeElement = document.getElementById(`change-${priceData.symbol}`);
 
-            if (priceElement) {
-                priceElement.textContent = `$${priceData.price.toFixed(4)}`;
-                priceElement.classList.add('text-warning');
-                setTimeout(() => priceElement.classList.remove('text-warning'), 1000);
-            }
+            if (priceElement && changeElement) {
+                // Flash animation for price update
+                priceElement.classList.add('price-update-flash');
+                setTimeout(() => priceElement.classList.remove('price-update-flash'), 500);
 
-            if (changeElement) {
+                priceElement.textContent = `$${formatPrice(priceData.price)}`;
+
                 const changeClass = priceData.change24h >= 0 ? 'price-up' : 'price-down';
-                const changeIcon = priceData.change24h >= 0 ? '↗' : '↘';
-                changeElement.className = changeClass;
-                changeElement.textContent = `${changeIcon} ${priceData.change24h.toFixed(2)}%`;
+                const changeIcon = priceData.change24h >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                changeElement.className = `${changeClass} mb-3`;
+                changeElement.innerHTML = `<i class="fas ${changeIcon}"></i> ${priceData.change24h.toFixed(2)}%`;
             }
+        }
+
+        // Format price with appropriate decimal places
+        function formatPrice(price) {
+            if (price >= 1000) return price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            if (price >= 1) return price.toFixed(4);
+            return price.toFixed(6);
+        }
+
+        // Get crypto icon
+        function getCryptoIcon(symbol) {
+            const icons = {
+                'BTC': '₿',
+                'ETH': 'Ξ',
+                'ADA': '₳',
+                'SOL': '◎',
+                'XRP': '✕',
+            };
+            return icons[symbol] || '🪙';
         }
 
         // Use price in calculator
         function usePrice(symbol, price) {
             document.getElementById('entryPrice').value = price.toFixed(4);
+
+            // Show notification
+            const toast = document.createElement('div');
+            toast.className = 'toast show position-fixed top-50 start-50 translate-middle';
+            toast.innerHTML = `
+                <div class="toast-header bg-primary text-white">
+                    <strong class="me-auto">Price Selected</strong>
+                </div>
+                <div class="toast-body bg-dark text-white">
+                    ${symbol} price $${formatPrice(price)} set as entry price
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Refresh all prices
+        async function refreshPrices() {
+            document.getElementById('priceContainer').innerHTML = '';
+            await loadInitialPrices();
+        }
+
+        // Risk percentage input handler
+        document.getElementById('riskPercentage').addEventListener('input', function() {
+            const risk = parseFloat(this.value) || 0;
+            const gauge = document.getElementById('riskGauge');
+
+            let width = Math.min(risk * 10, 100);
+            let className = 'risk-level ';
+
+            if (risk <= 2) className += 'risk-low';
+            else if (risk <= 5) className += 'risk-medium';
+            else className += 'risk-high';
+
+            gauge.style.width = width + '%';
+            gauge.className = className;
+        });
+
+        // Leverage selection handler
+        document.getElementById('leverage').addEventListener('change', function() {
+            const leverage = parseInt(this.value);
+            const warning = document.getElementById('leverageWarning');
+
+            if (leverage >= 10) {
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+        });
+
+        // Position type change handler
+        document.querySelectorAll('input[name="positionType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                updateStopLossPlaceholder();
+            });
+        });
+
+        // Update stop loss placeholder based on position type
+        function updateStopLossPlaceholder() {
+            const isShort = document.querySelector('input[name="positionType"]:checked').value === 'true';
+            const stopLossInput = document.getElementById('stopLossPrice');
+
+            if (isShort) {
+                stopLossInput.placeholder = 'Must be higher than entry price';
+            } else {
+                stopLossInput.placeholder = 'Must be lower than entry price';
+            }
         }
 
         // Risk calculation form handler
         document.getElementById('riskForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            loadingSpinner.style.display = 'inline-block';
+
             const formData = {
                 accountBalance: parseFloat(document.getElementById('accountBalance').value),
                 riskPercentage: parseFloat(document.getElementById('riskPercentage').value),
                 entryPrice: parseFloat(document.getElementById('entryPrice').value),
-                stopLossPrice: parseFloat(document.getElementById('stopLossPrice').value)
+                stopLossPrice: parseFloat(document.getElementById('stopLossPrice').value),
+                leverage: parseFloat(document.getElementById('leverage').value),
+                isShort: document.querySelector('input[name="positionType"]:checked').value === 'true'
             };
+
+            // Validation
+            if (!validateInputs(formData)) {
+                loadingSpinner.style.display = 'none';
+                return;
+            }
 
             try {
                 const response = await fetch('/api/crypto/calculate-risk', {
@@ -192,23 +814,116 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    displayResults(result);
+                    displayResults(result, formData);
                 } else {
-                    alert('Error: ' + result);
+                    showError('Calculation Error: ' + result);
                 }
             } catch (error) {
-                alert('Calculation error: ' + error.message);
+                showError('Network Error: ' + error.message);
+            } finally {
+                loadingSpinner.style.display = 'none';
             }
         });
 
-        // Display calculation results
-        function displayResults(result) {
-            document.getElementById('riskAmount').textContent = result.riskAmount.toFixed(2);
-            document.getElementById('positionSize').textContent = result.positionSize.toFixed(6);
-            document.getElementById('usdtInvestment').textContent = (result.positionSize * result.entryPrice).toFixed(2);
-            document.getElementById('results').style.display = 'block';
+        // Validate form inputs
+        function validateInputs(data) {
+            if (data.accountBalance <= 0) {
+                showError('Account balance must be greater than 0');
+                return false;
+            }
+
+            if (data.riskPercentage <= 0 || data.riskPercentage > 100) {
+                showError('Risk percentage must be between 0.1% and 100%');
+                return false;
+            }
+
+            if (data.entryPrice <= 0) {
+                showError('Entry price must be greater than 0');
+                return false;
+            }
+
+            if (data.stopLossPrice <= 0) {
+                showError('Stop loss price must be greater than 0');
+                return false;
+            }
+
+            if (data.isShort && data.stopLossPrice <= data.entryPrice) {
+                showError('For SHORT positions, Stop Loss must be HIGHER than Entry Price');
+                return false;
+            }
+
+            if (!data.isShort && data.stopLossPrice >= data.entryPrice) {
+                showError('For LONG positions, Stop Loss must be LOWER than Entry Price');
+                return false;
+            }
+
+            return true;
         }
+
+        // Display calculation results
+        function displayResults(result, formData) {
+            document.getElementById('riskAmount').textContent = result.riskAmount.toFixed(2);
+            document.getElementById('positionSize').textContent = result.positionSize.toFixed(8);
+            document.getElementById('marginRequired').textContent = result.marginRequired.toFixed(2);
+            document.getElementById('totalPositionValue').textContent = result.totalPositionValue.toFixed(2);
+            document.getElementById('leverageUsed').textContent = result.leverage;
+            document.getElementById('liquidationPrice').textContent = result.liquidationPrice.toFixed(2);
+
+            // Calculate additional metrics
+            const freeMargin = formData.accountBalance - result.marginRequired;
+            const marginUsage = (result.marginRequired / formData.accountBalance * 100);
+            const riskReward = Math.abs((100 - formData.entryPrice) / (formData.stopLossPrice - formData.entryPrice));
+
+            document.getElementById('freeMargin').textContent = freeMargin.toFixed(2);
+            document.getElementById('marginUsage').textContent = marginUsage.toFixed(1) + '%';
+            document.getElementById('riskReward').textContent = riskReward.toFixed(1);
+
+            // Color code margin usage
+            const marginElement = document.getElementById('marginUsage');
+            if (marginUsage > 80) {
+                marginElement.className = 'text-danger';
+            } else if (marginUsage > 50) {
+                marginElement.className = 'text-warning';
+            } else {
+                marginElement.className = 'text-success';
+            }
+
+            document.getElementById('results').style.display = 'block';
+
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show error message
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast show position-fixed top-50 start-50 translate-middle';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="toast-header bg-danger text-white">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close btn-close-white" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+                <div class="toast-body bg-dark text-white">
+                    ${message}
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSignalR();
+            updateStopLossPlaceholder();
+
+            // Initialize tooltips if needed
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
     </script>
 </body>
 </html>
-
