@@ -1,0 +1,214 @@
+﻿@* @{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div> *@
+
+<!-- Views/Home/Index.cshtml -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Risk Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .price-card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .price-up { color: #28a745; }
+        .price-down { color: #dc3545; }
+        .risk-calculator { background: #f8f9fa; padding: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <h1 class="text-center mb-4">Crypto Trading Risk Management</h1>
+
+        <!-- Live Prices Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3>Live Crypto Prices</h3>
+                <div class="row" id="priceContainer">
+                    <!-- Price cards will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Calculator Section -->
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="risk-calculator">
+                    <h3 class="text-center mb-4">Position Size Calculator</h3>
+
+                    <form id="riskForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="accountBalance" class="form-label">Account Balance (USDT)</label>
+                                <input type="number" class="form-control" id="accountBalance" step="0.01" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="riskPercentage" class="form-label">Risk Percentage (%)</label>
+                                <input type="number" class="form-control" id="riskPercentage" step="0.1" max="10" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="entryPrice" class="form-label">Entry Price (USDT)</label>
+                                <input type="number" class="form-control" id="entryPrice" step="0.00001" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="stopLossPrice" class="form-label">Stop Loss Price (USDT)</label>
+                                <input type="number" class="form-control" id="stopLossPrice" step="0.00001" required>
+                            </div>
+                        </div>
+
+                        <div class="text-center mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Calculate Position Size</button>
+                        </div>
+                    </form>
+
+                    <!-- Results -->
+                    <div id="results" class="mt-4" style="display: none;">
+                        <div class="alert alert-info">
+                            <h5>Calculation Results:</h5>
+                            <p><strong>Risk Amount:</strong> $<span id="riskAmount"></span> USDT</p>
+                            <p><strong>Position Size:</strong> <span id="positionSize"></span> coins</p>
+                            <p><strong>USDT Investment:</strong> $<span id="usdtInvestment"></span> USDT</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        // SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/priceHub")
+            .build();
+
+        // Start SignalR connection
+        connection.start().then(function () {
+            console.log("SignalR connected");
+            loadInitialPrices();
+        }).catch(function (err) {
+            console.error(err.toString());
+        });
+
+        // Receive real-time price updates
+        connection.on("ReceivePriceUpdate", function (priceData) {
+            updatePriceCard(priceData);
+        });
+
+        // Load initial prices
+        async function loadInitialPrices() {
+            const symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'XRPUSDT'];
+
+            for (const symbol of symbols) {
+                try {
+                    const response = await fetch(`/api/crypto/price/${symbol}`);
+                    const priceData = await response.json();
+                    createPriceCard(priceData);
+                } catch (error) {
+                    console.error(`Error loading ${symbol}:`, error);
+                }
+            }
+        }
+
+        // Create price card
+        function createPriceCard(priceData) {
+            const container = document.getElementById('priceContainer');
+            const changeClass = priceData.change24h >= 0 ? 'price-up' : 'price-down';
+            const changeIcon = priceData.change24h >= 0 ? '↗' : '↘';
+
+            const cardHtml = `
+                <div class="col-md-2 col-sm-4 mb-3">
+                    <div class="card price-card" id="card-${priceData.symbol}">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">${priceData.symbol.replace('USDT', '')}</h6>
+                            <h5 class="card-text" id="price-${priceData.symbol}">$${priceData.price.toFixed(4)}</h5>
+                            <small class="${changeClass}" id="change-${priceData.symbol}">
+                                ${changeIcon} ${priceData.change24h.toFixed(2)}%
+                            </small>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-primary" onclick="usePrice('${priceData.symbol}', ${priceData.price})">
+                                    Use Price
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += cardHtml;
+        }
+
+        // Update existing price card
+        function updatePriceCard(priceData) {
+            const priceElement = document.getElementById(`price-${priceData.symbol}`);
+            const changeElement = document.getElementById(`change-${priceData.symbol}`);
+
+            if (priceElement) {
+                priceElement.textContent = `$${priceData.price.toFixed(4)}`;
+                priceElement.classList.add('text-warning');
+                setTimeout(() => priceElement.classList.remove('text-warning'), 1000);
+            }
+
+            if (changeElement) {
+                const changeClass = priceData.change24h >= 0 ? 'price-up' : 'price-down';
+                const changeIcon = priceData.change24h >= 0 ? '↗' : '↘';
+                changeElement.className = changeClass;
+                changeElement.textContent = `${changeIcon} ${priceData.change24h.toFixed(2)}%`;
+            }
+        }
+
+        // Use price in calculator
+        function usePrice(symbol, price) {
+            document.getElementById('entryPrice').value = price.toFixed(4);
+        }
+
+        // Risk calculation form handler
+        document.getElementById('riskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                accountBalance: parseFloat(document.getElementById('accountBalance').value),
+                riskPercentage: parseFloat(document.getElementById('riskPercentage').value),
+                entryPrice: parseFloat(document.getElementById('entryPrice').value),
+                stopLossPrice: parseFloat(document.getElementById('stopLossPrice').value)
+            };
+
+            try {
+                const response = await fetch('/api/crypto/calculate-risk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayResults(result);
+                } else {
+                    alert('Error: ' + result);
+                }
+            } catch (error) {
+                alert('Calculation error: ' + error.message);
+            }
+        });
+
+        // Display calculation results
+        function displayResults(result) {
+            document.getElementById('riskAmount').textContent = result.riskAmount.toFixed(2);
+            document.getElementById('positionSize').textContent = result.positionSize.toFixed(6);
+            document.getElementById('usdtInvestment').textContent = (result.positionSize * result.entryPrice).toFixed(2);
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
